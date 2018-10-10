@@ -26,6 +26,7 @@ This code is tested with Python 3.6.  We're using [Anaconda 5.2](https://www.ana
 ```
 conda create -n n2n python=3.6
 conda activate n2n
+conda install tensorflow-gpu
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```

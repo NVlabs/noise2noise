@@ -107,6 +107,10 @@ Suppose your training run results were stored under `results/00001-autoencoder-1
 python config.py validate --dataset-dir=datasets/kodak --network-snapshot=results/00001-autoencoder-1gpu-L-n2n/network_final.pickle
 ```
 
+### Pre-trained networks
+
+You can find pre-trained networks for Poisson and Gaussian noise removal here: https://drive.google.com/drive/folders/1-84ORv4wB8W3M6WngFTtccuW7SlPku0V
+
 ## Reproducing Noise2Noise paper results
 
 Here's a summary of training options to reproduce results from the Noise2Noise paper:
@@ -127,7 +131,7 @@ To validate against a trained network, use the following options:
 | Poisson  | kodak       | python config.py validate --dataset-dir=datasets/kodak --noise=poisson --network-snapshot=<.../network_final.pickle> | 31.66 (n2c) / 31.66 (n2n) |
 | Poisson  | bsd300      | python config.py validate --dataset-dir=datasets/bsd300 --noise=poisson --network-snapshot=<.../network_final.pickle> | 30.27 (n2c) / 30.26 (n2n) |
 
-_Note: When running a validation set through the network, you should match the augmentation noise (e.g., gaussian or poisson) with the type of noise that was used to train the network._
+_Note: When running a validation set through the network, you should match the augmentation noise (e.g., Gaussian or Poisson) with the type of noise that was used to train the network._
 
 ## MRI denoising
 

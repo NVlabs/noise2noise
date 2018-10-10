@@ -5,12 +5,10 @@
 # http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
 # Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
-import os
 import tensorflow as tf
 import numpy as np
 
 import dnnlib
-import dnnlib.submission.submit as submit
 import dnnlib.tflib as tflib
 from dnnlib.tflib.autosummary import autosummary
 import dnnlib.tflib.tfutil as tfutil
@@ -18,7 +16,7 @@ import dnnlib.util as util
 
 import config
 
-from util import save_image
+from util import save_image, save_snapshot
 from validation import ValidationSet
 from dataset import create_dataset
 
@@ -47,18 +45,6 @@ class AugmentPoisson:
     def add_validation_noise_np(self, x):
         chi = 30.0
         return np.random.poisson(chi*(x+0.5))/chi - 0.5
-
-def save_snapshot(submit_config, net, fname_postfix):
-    import pickle
-    dump_fname = os.path.join(submit_config.run_dir, "network_%s.pickle" % fname_postfix)
-    with open(dump_fname, "wb") as f:
-        pickle.dump(net, f)
-
-def load_snapshot(fname):
-    import pickle
-    fname = os.path.join(submit.get_path_from_template(fname))
-    with open(fname, "rb") as f:
-        return pickle.load(f)
 
 def compute_ramped_down_lrate(i, iteration_count, ramp_down_perc, learning_rate):
     ramp_down_start_iter = iteration_count * (1 - ramp_down_perc)
@@ -174,22 +160,4 @@ def train(
 
     # Summary log and context should be closed at the end
     summary_log.close()
-    ctx.close()
-
-
-def validate(submit_config: dnnlib.SubmitConfig, noise: dict, dataset: dict, network_snapshot: str):
-    noise_augmenter = dnnlib.util.call_func_by_name(**noise)
-    validation_set = ValidationSet(submit_config)
-    validation_set.load(**dataset)
-
-    # Create a run context (hides low level details, exposes simple API to manage the run)
-    ctx = dnnlib.RunContext(submit_config, config)
-
-    # Initialize TensorFlow graph and session using good default settings
-    tfutil.init_tf(config.tf_config)
-
-    # Construct the network using the Network helper class and a function defined in config.net_config
-    with tf.device("/gpu:0"):
-        net = load_snapshot(network_snapshot)
-        validation_set.evaluate(net, 0, noise_augmenter.add_validation_noise_np)
     ctx.close()

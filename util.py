@@ -10,6 +10,9 @@ import numpy as np
 import pickle
 import PIL.Image
 
+import dnnlib.submission.submit as submit
+
+# save_pkl, load_pkl are used by the mri code to save datasets
 def save_pkl(obj, filename):
     with open(filename, 'wb') as file:
         pickle.dump(obj, file, protocol=pickle.HIGHEST_PROTOCOL)
@@ -17,6 +20,18 @@ def save_pkl(obj, filename):
 def load_pkl(filename):
     with open(filename, 'rb') as file:
         return pickle.load(file)
+
+# save_snapshot, load_snapshot are used save/restore trained networks
+def save_snapshot(submit_config, net, fname_postfix):
+    dump_fname = os.path.join(submit_config.run_dir, "network_%s.pickle" % fname_postfix)
+    with open(dump_fname, "wb") as f:
+        pickle.dump(net, f)
+
+def load_snapshot(fname):
+    fname = os.path.join(submit.get_path_from_template(fname))
+    with open(fname, "rb") as f:
+        return pickle.load(f)
+
 
 def save_image(submit_config, img_t, filename):
     t = img_t.transpose([1, 2, 0])  # [RGB, H, W] -> [H, W, RGB]

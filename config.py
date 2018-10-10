@@ -11,6 +11,8 @@ import sys
 
 import dnnlib.submission.submit as submit
 
+import validation
+
 # Submit config
 # ------------------------------------------------------------------------------------------
 
@@ -82,7 +84,7 @@ train_config = dnnlib.EasyDict(
 # Validation run config
 # ------------------------------------------------------------------------------------------
 validate_config = dnnlib.EasyDict(
-    run_func_name="train.validate",
+    run_func_name="validation.validate",
     dataset=default_validation_config,
     network_snapshot=None,
     noise=gaussian_noise_config
@@ -162,6 +164,20 @@ if __name__ == "__main__":
         validate_config.network_snapshot = args.network_snapshot
         dnnlib.submission.submit.submit_run(submit_config, **validate_config)
 
+    def infer_image(args):
+        if submit_config.submit_target != dnnlib.SubmitTarget.LOCAL:
+            print ('Command line overrides currently supported only in local runs for the validate subcommand')
+            sys.exit(1)
+        if args.image is None:
+            error('Must specify image file with --image')
+        if args.out is None:
+            error('Must specify output image file with --out')
+        if args.network_snapshot is None:
+            error('Must specify trained network filename with --network-snapshot')
+        # Note: there's no dnnlib.submission.submit_run here. This is for quick interactive
+        # testing, not for long-running training or validation runs.
+        validation.infer_image(args.network_snapshot, args.image, args.out)
+
     # Train by default
     parser = argparse.ArgumentParser(
         description='Train a network or run a set of images through a trained network.',
@@ -180,9 +196,15 @@ if __name__ == "__main__":
 
     parser_validate = subparsers.add_parser('validate', help='Run a set of images through the network')
     parser_validate.add_argument('--dataset-dir', help='Load all images from a directory (*.png, *.jpg/jpeg, *.bmp)')
-    parser_validate.add_argument('--network-snapshot', help='Specify trained network filename')
+    parser_validate.add_argument('--network-snapshot', help='Trained network pickle')
     parser_validate.add_argument('--noise', default='gaussian', help='Type of noise corruption (one of: gaussian, poisson)')
     parser_validate.set_defaults(func=validate)
+
+    parser_infer_image = subparsers.add_parser('infer-image', help='Run one image through the network without adding any noise')
+    parser_infer_image.add_argument('--image', help='Image filename')
+    parser_infer_image.add_argument('--out', help='Output filename')
+    parser_infer_image.add_argument('--network-snapshot', help='Trained network pickle')
+    parser_infer_image.set_defaults(func=infer_image)
 
     args = parser.parse_args()
     submit_config.run_desc = desc + args.desc

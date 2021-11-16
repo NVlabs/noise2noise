@@ -68,7 +68,9 @@ def main():
     #----------------------------------------------------------
     outdir = os.path.dirname(args.out)
     os.makedirs(outdir, exist_ok=True)
-    writer = tf.python_io.TFRecordWriter(args.out)
+    #writer = tf.python_io.TFRecordWriter(args.out)
+    tf_versions = [1,2]
+    writer = tf.io.TFRecordWriter(args.out) if str(tf.__version__)[0]==str(tf_versions[1]) else tf.python_io.TFRecordWriter(args.out)
     for (idx, imgname) in enumerate(images):
         print (idx, imgname)
         image = load_image(imgname)

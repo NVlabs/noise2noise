@@ -1,4 +1,4 @@
-Pillow==5.2.0
+Pillow==6.2.0
 typeguard==2.2.2
 nibabel==2.3.0
 scipy==1.1.0
